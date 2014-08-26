@@ -17,5 +17,5 @@ def execute_cmd(cmd):
 while 1:
     display.clear()
     ipv4 = execute_cmd(ip_addr_cmd)
-    display.message(" Mr Beam \n"+ipv4)
+    display.message("Go Mr Beam ->\n"+ipv4)
     sleep(10)
