@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 # modified version of Lance R. Vick's lcd code
-# https://github.com/lrvick/raspi-hd44780/blob/master/hd44780.py
+# https://github.com/lrvick/raspi-hd44780/blob/master/hd44780.py and
+# https://github.com/arduino/Arduino/blob/master/libraries/LiquidCrystal/LiquidCrystal.cpp
 
 import RPi.GPIO as GPIO
 from time import sleep
