@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 from hd44780 import HD44780
+from subprocess import *
+from time import sleep, strftime
 
 display = HD44780()
 
