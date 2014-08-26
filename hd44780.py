@@ -39,12 +39,12 @@ class HD44780:
     LCD_MOVELEFT = 0x00
 
     # flags for function set
-    LCD_8BITMODE 0x10
-    LCD_4BITMODE 0x00
-    LCD_2LINE 0x08
-    LCD_1LINE 0x00
-    LCD_5x10DOTS 0x04
-    LCD_5x8DOTS 0x00
+    LCD_8BITMODE = 0x10
+    LCD_4BITMODE = 0x00
+    LCD_2LINE = 0x08
+    LCD_1LINE = 0x00
+    LCD_5x10DOTS = 0x04
+    LCD_5x8DOTS = 0x00
 
     def __init__(self, pin_rs=25, pin_e=24, pins_db=[23, 17, 27, 22]):
 
