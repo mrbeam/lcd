@@ -50,11 +50,11 @@ def update_display(data):
     
     if (data['result']['connections']['ap']):
         display_msg = "WiFi: MrBeamAP\n%s" % ip_wifi
+    elif (data['result']['connections']['wired']):
+        display_msg = "Cable/LAN\n%s" % ip_wire
     elif (data['result']['connections']['wifi']):
         wifiname = data['result']['wifi']['current_ssid']
         display_msg = "WiFi: %s\n%s" % (wifiname, ip_wifi)
-    elif (data['result']['connections']['wired']):
-        display_msg = "Cable/LAN\n%s" % ip_wire
     else:
         display_msg = "No connection"
     
