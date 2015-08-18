@@ -28,7 +28,7 @@ def get_ip(devname):
 
 def octoprint_running():
 	netstat_out = execute_cmd(port5000_cmd)
-	if("0.0.0.0:5000" in netstat_out):
+	if(":5000" in netstat_out):
 		return True
 	else:
 		return False
