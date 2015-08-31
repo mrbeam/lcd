@@ -94,4 +94,4 @@ while 1:
 	if (new_text != current_text):
 		current_text = new_text
 		update_display(current_text)	
-	sleep(2)
+	sleep(5) # TODO dynamic waiting time depending on connection status.
