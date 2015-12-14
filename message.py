@@ -2,38 +2,32 @@
 
 from hd44780 import HD44780
 from time import sleep
-from subprocess import *
 import json
 import socket
+import netifaces
 
-
+interfaces = netifaces.interfaces()
 display = HD44780()
-
-ip_addr_cmd = "ip -4 -o addr show %s | cut -d ' ' -f7 | cut -d/ -f1"
-port5000_cmd = "netstat -tln | grep :5000"
-text = [""]
 current_text = ""
 
-
-def execute_cmd(cmd):
-	p = Popen(cmd, shell=True, stdout=PIPE)
-	output = p.communicate()[0]
-	return output
-	
-def get_ip(devname):
-	ip = execute_cmd(ip_addr_cmd % devname)
-	if not ip:
-		ip = "Unknown IP"
-	return ip
-
 def octoprint_running():
-	netstat_out = execute_cmd(port5000_cmd)
-	if(":5000" in netstat_out):
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	result = s.connect_ex(('127.0.0.1',5000))
+	s.close()
+	if result == 0:
 		return True
 	else:
 		return False
 
+def get_ip_by_interface(ifname):
+	ipInfo = netifaces.ifaddresses(ifname)
+	try:
+		return ipInfo[netifaces.AF_INET][0]['addr']
+	except:
+		return False
+
 def request_status_from_socket():
+	socket.setdefaulttimeout(1)
 	sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 	try:
 		sock.connect('/var/run/netconnectd.sock')
@@ -45,53 +39,40 @@ def request_status_from_socket():
 				buffer.append(chunk)
 				if chunk.endswith('\x00'):
 					break
-
 		json_string = ''.join(buffer).strip()[:-1]
 		data = json.loads(json_string.strip())
 		return data
 
 	except socket.error, exc:
-		#print("socket not ready", exc);
-		return None
+		return False
 	finally:
 		sock.close()
 
-def get_text(data):
-	display_msg = ""
-	if(data != None and 'result' in data and 'connections' in data['result']):
-		conn = data['result']['connections']
-		if ('ap' in conn and conn['ap'] == True):
-			ip_wifi = get_ip("wlan0")
-			display_msg = "WiFi: MrBeamAP\n%s" % ip_wifi
-		elif ('wired' in conn and conn['wired'] == True):
-			ip_wire = get_ip("eth0")
-			display_msg = "Cable/LAN\n%s" % ip_wire
-		elif ('wifi' in conn and conn['wifi'] == True):
-			ip_wifi = get_ip("wlan0")
-			wifiname = data['result']['wifi']['current_ssid']
-			display_msg = "WiFi: %s\n%s" % (wifiname, ip_wifi)
-	else:
-		display_msg = "No connection"
-	return display_msg
-	
 def update_display(msg):
-	display.clear()
-	sleep(0.3)
-	display.message(msg)
-
+	global current_text
+	if (current_text != msg):
+		current_text = msg
+		display.clear()
+		sleep(0.3)
+		display.message(msg)
+	sleep(7)
 
 display.clear()
 i = 0
 while 1:
-	new_status = request_status_from_socket()
-	text = [get_text(new_status)]
 	if(not octoprint_running()):
-		text.append("waiting...\n\n")
-
-	
-	i = (i+1) % len(text)
-	new_text = text[i]
-	if (new_text != current_text):
-		current_text = new_text
-		update_display(current_text)	
-	sleep(5) # TODO dynamic waiting time depending on connection status.
+		update_display('Starting MrBeam\nInterface...')
+	else:
+		update_display('MrBeam ready!')	
+	for (interface, name) in enumerate(interfaces):
+		if (name == 'eth0' and get_ip_by_interface(name)):
+			update_display("Interface: %s\n%s" % (name, get_ip_by_interface(name)))
+		if (name == 'wlan0' and get_ip_by_interface(name)):
+			data = request_status_from_socket()
+			if data:
+				conn = data['result']['connections']
+				if ('ap' in conn and conn['ap'] == True):
+					update_display("WIFI: MrBeamAP\n%s" % get_ip_by_interface(name))
+				elif ('wifi' in conn):
+					wifiname = data['result']['wifi']['current_ssid']
+					update_display("WIFI: %s\n%s" % (wifiname, get_ip_by_interface(name)))
