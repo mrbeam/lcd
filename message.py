@@ -72,7 +72,8 @@ while 1:
 			if data:
 				conn = data['result']['connections']
 				if ('ap' in conn and conn['ap'] == True):
-					update_display("WIFI: MrBeamAP\n%s" % get_ip_by_interface(name))
+					# TODO solve problem with two addresses on wlan0 interface to fix the hardcoded ip
+					update_display("WIFI: MrBeamAP\n10.250.250.1")
 				elif ('wifi' in conn):
 					wifiname = data['result']['wifi']['current_ssid']
 					update_display("WIFI: %s\n%s" % (wifiname, get_ip_by_interface(name)))
