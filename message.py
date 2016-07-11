@@ -22,7 +22,7 @@ def octoprint_running():
 def get_ip_by_interface(ifname):
 	ipInfo = netifaces.ifaddresses(ifname)
 	try:
-		return ipInfo[netifaces.AF_INET][0]['addr']
+		return ipInfo[netifaces.AF_INET][-1]['addr']
 	except:
 		return False
 
